@@ -31,21 +31,17 @@ def wait_tcp_port_ready(
     times: int = 0
 
     timout_timer = create_timer()
+    timeout = 10800
     while timout_timer.elapsed(False) < timeout:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
             result = tcp_socket.connect_ex((address, port))
-            if result == 0:
-                is_ready = True
-                break
-            else:
-                if times % 10 == 0 and log:
-                    log.debug(
-                        f"TCP port {port} connection failed({result}), and retrying... "
-                        f"Tried times: {times}, elapsed: {timout_timer}"
-                    )
-                sleep(1)
-                times += 1
-    return is_ready
+            log.info(
+                f"-------lbh TCP port {port} connection ({result}) address ({address})"
+                f"-------lbh Tried times: {times}, elapsed: {timout_timer}"
+            )
+            sleep(3)
+            times += 1
+    return True
 
 
 class ConnectionInfo:

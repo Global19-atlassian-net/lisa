@@ -541,7 +541,7 @@ class AzurePlatform(Platform):
                     self._deploy(location, deployment_parameters, log)
 
                 # Even skipped deploy, try best to initialize nodes
-                self._initialize_nodes(environment)
+                self._initialize_nodes(environment,log)
             except Exception as identifier:
                 self._delete_environment(environment, log)
                 raise identifier
@@ -894,8 +894,7 @@ class AzurePlatform(Platform):
                 errors = [f"{error.code}: {error.message}"]
         return errors
 
-    def _initialize_nodes(self, environment: Environment) -> None:
-
+    def _initialize_nodes(self, environment: Environment, log: Logger) -> None:
         node_context_map: Dict[str, Node] = dict()
         for node in environment.nodes.list():
             node_context = get_node_context(node)
@@ -904,11 +903,16 @@ class AzurePlatform(Platform):
         compute_client = get_compute_client(self)
         environment_context = get_environment_context(environment=environment)
         vms_map: Dict[str, VirtualMachine] = dict()
-        vms = compute_client.virtual_machines.list(
-            environment_context.resource_group_name
-        )
-        for vm in vms:
-            vms_map[vm.name] = vm
+        for i in range(10):
+            vms = compute_client.virtual_machines.list(
+                environment_context.resource_group_name
+            )
+            log.debug(f"--------lbh")
+
+            for vm in vms:
+                log.debug(f"--------lbh vm: {vm}")
+                log.debug(f"--------lbh vm.name: {vm.name}")
+                vms_map[vm.name] = vm
 
         network_client = NetworkManagementClient(
             credential=self.credential, subscription_id=self.subscription_id

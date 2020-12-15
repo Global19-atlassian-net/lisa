@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import time
 from dataclasses import InitVar, dataclass, field
 from datetime import datetime
 from functools import lru_cache
@@ -903,16 +904,17 @@ class AzurePlatform(Platform):
         compute_client = get_compute_client(self)
         environment_context = get_environment_context(environment=environment)
         vms_map: Dict[str, VirtualMachine] = dict()
-        for i in range(10):
+        log.debug(f"--------lbh environment_context.resource_group_name:{environment_context.resource_group_name}")
+        for i in range(50):
             vms = compute_client.virtual_machines.list(
                 environment_context.resource_group_name
             )
             log.debug(f"--------lbh")
 
             for vm in vms:
-                log.debug(f"--------lbh vm: {vm}")
                 log.debug(f"--------lbh vm.name: {vm.name}")
                 vms_map[vm.name] = vm
+            time.sleep(1)
 
         network_client = NetworkManagementClient(
             credential=self.credential, subscription_id=self.subscription_id

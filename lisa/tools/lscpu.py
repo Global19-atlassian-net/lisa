@@ -5,8 +5,10 @@ from lisa.executable import Tool
 
 
 class Lscpu(Tool):
-    __pattern_cores_per_socket = re.compile(r"^Core\(s\) per socket:[ ]+([\d]+)$", re.M)
-    __pattern_sockets = re.compile(r"^Socket\(s\):[ ]+([\d]+)$", re.M)
+    __pattern_cores_per_socket = re.compile(
+        r"^Core\(s\) per socket:[ ]+([\d]+).*$", re.M
+    )
+    __pattern_sockets = re.compile(r"^Socket\(s\):[ ]+([\d]+).*$", re.M)
 
     def _initialize(self, *args: Any, **kwargs: Any) -> None:
         self._core_count: Optional[int] = None

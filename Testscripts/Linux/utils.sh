@@ -2587,20 +2587,13 @@ function install_lagscope () {
 
 # Build and install ntttcp
 function build_ntttcp () {
-	ntttcp_version="1.4.0"
-	# If the ntttcpVersion is provided in xml then it will go for that version, otherwise default to 1.4.0.
-	if [ "${1}" ]; then
-		ntttcp_version=${1}
-	fi
-	if [ $ntttcp_version == "master" ]; then
-		git clone https://github.com/Microsoft/ntttcp-for-linux.git
-		pushd ntttcp-for-linux/src/ && make && make install
-	else
-		wget https://github.com/Microsoft/ntttcp-for-linux/archive/${ntttcp_version}.tar.gz
-		tar -zxvf ${ntttcp_version}.tar.gz
-		pushd ntttcp-for-linux-${ntttcp_version/v/}/src/ && make && make install
-	fi
+	git clone https://github.com/lubaihua33/ntttcp-for-linux.git
+	pushd ntttcp-for-linux/
+	git checkout fix
+	pushd ./src/ && make && make install
 	popd
+	popd
+
 }
 
 # Install ntttcp and required packages

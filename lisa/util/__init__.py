@@ -1,6 +1,8 @@
+import concurrent.futures
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Pattern, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Optional, Pattern, Type, TypeVar
 
 T = TypeVar("T")
 
@@ -140,3 +142,40 @@ def get_matched_str(content: str, pattern: Pattern[str]) -> str:
             # if something matched, it's like ['matched']
             result = matched_item[0]
     return result
+
+
+def run_in_threads(
+    methods: List[Any],
+    max_workers: int = 0,
+    completed_callback: Optional[Callable[[Any], None]] = None,
+) -> None:
+    """
+    start methods in a thread pool
+    """
+    if max_workers <= 0:
+        max_workers = len(methods)
+    with concurrent.futures.ThreadPoolExecutor(max_workers) as pool:
+        futures = [pool.submit(method) for method in methods]
+        if completed_callback:
+            for future in futures:
+                future.add_done_callback(completed_callback)
+        try:
+            while any(x.running() for x in futures):
+                for future in futures:
+                    # join exceptions of subthreads to main thread
+                    if future.done():
+                        # removed finished threads
+                        futures.remove(future)
+                        if future.exception():
+                            # trigger to throw exception
+                            future.result()
+                        break
+                time.sleep(1)
+        finally:
+            for future in futures:
+                if future.done() and future.exception():
+                    # throw exception, if it's not here.
+                    future.result()
+                elif future.running():
+                    # cancel running threads. It may need cancellation callback
+                    future.cancel()

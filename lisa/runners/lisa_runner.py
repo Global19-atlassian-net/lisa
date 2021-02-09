@@ -42,7 +42,10 @@ class LisaRunner(BaseRunner):
         selected_test_cases = select_testcases(testcase_filters)
 
         # create test results
-        test_results = [TestResult(runtime_data=case) for case in selected_test_cases]
+        test_results = [
+            TestResult(index, runtime_data=case)
+            for index, case in enumerate(selected_test_cases)
+        ]
 
         run_message = notifier.TestRunMessage(
             status=notifier.TestRunStatus.RUNNING,
